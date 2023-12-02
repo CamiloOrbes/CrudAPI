@@ -4,47 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles.css">
-    <title>CRUD App</title>
+    <title>CRUD Estudiantes</title>
 </head>
 <body>
-    <h1>Estudiantes</h1>
+    <h1>CRUD Estudiantes</h1>
 
-    <button id="btnLeerEstudiantes">Leer Estudiantes</button>
-    <button id="btnCrearEstudiante">Crear Estudiante</button>
-
-    <div id="crearEstudianteForm" style="display: none;">
-        <label for="nombre">Nombre:</label>
-        <input type="text" id="nombre" name="nombre" required><br>
-
-        <label for="edad">Edad:</label>
-        <input type="number" id="edad" name="edad" required><br>
-
-        <label for="carrera">Carrera:</label>
-        <input type="text" id="carrera" name="carrera" required><br>
-
-        <label for="semestre">Semestre:</label>
-        <input type="number" id="semestre" name="semestre" required><br>
-
-        <label for="materias">Materias:</label>
-        <input type="number" id="materias" name="materias" required><br>
-
-        <label for="activo">Activo:</label>
-        <input type="checkbox" id="activo" name="activo" checked><br>
-
-        <label for="hobbie">Hobbie:</label>
-        <input type="text" id="hobbie" name="hobbie"><br>
-
-        <button id="btnGuardarEstudiante">Guardar Estudiante</button>
-    </div>
-
-    <button id="btnActualizarEstudiante">Actualizar Estudiante</button>
-    <input type="number" id="inputIdActualizar" placeholder="ID a actualizar">
-    
-    <button id="btnEliminarEstudiante">Eliminar Estudiante</button>
-    <input type="number" id="inputIdEliminar" placeholder="ID a eliminar">
+    <button onclick="listarEstudiantes()">Listar Estudiantes</button>
+    <button onclick="crearEstudiante()">Crear Estudiante</button>
+    <button onclick="editarEstudiante()">Editar Estudiante</button>
+    <button onclick="eliminarEstudiante()">Eliminar Estudiante</button>
 
     <div id="resultado"></div>
 
     <script src="script.js"></script>
 </body>
 </html>
+

@@ -1,123 +1,89 @@
-document.addEventListener('DOMContentLoaded', function () {
-    const btnLeerEstudiantes = document.getElementById('btnLeerEstudiantes');
-    const btnCrearEstudiante = document.getElementById('btnCrearEstudiante');
-    const btnGuardarEstudiante = document.getElementById('btnGuardarEstudiante');
-    const btnActualizarEstudiante = document.getElementById('btnActualizarEstudiante');
-    const btnEliminarEstudiante = document.getElementById('btnEliminarEstudiante');
-    const resultadoDiv = document.getElementById('resultado');
-    const crearEstudianteForm = document.getElementById('crearEstudianteForm');
-    const inputIdActualizar = document.getElementById('inputIdActualizar');
-    const inputIdEliminar = document.getElementById('inputIdEliminar');
+function request(method, url, callback, data = null) {
+    const xhr = new XMLHttpRequest();
+    xhr.open(method, url, true);
+    xhr.setRequestHeader("Content-Type", "application/json");
 
-    btnLeerEstudiantes.addEventListener('click', async function () {
-        try {
-            const response = await fetch('http://localhost:8080/estudiante');
-            const estudiantes = await response.json();
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200 || xhr.status === 201) {
+                callback(null, JSON.parse(xhr.responseText));
+            } else {
+                callback(xhr.statusText, null);
+            }
+        }
+    };
 
-            // Mostrar los estudiantes en el resultadoDiv
-            mostrarResultado(estudiantes);
-        } catch (error) {
-            manejarError('Error al leer estudiantes:', error);
+    xhr.send(data ? JSON.stringify(data) : null);
+}
+
+function listarEstudiantes() {
+    request("GET", "http://localhost:8080/estudiante", function (err, data) {
+        if (err) {
+            document.getElementById("resultado").innerText = "Error al listar estudiantes";
+        } else {
+            document.getElementById("resultado").innerText = JSON.stringify(data, null, 2);
         }
     });
+}
 
-    btnCrearEstudiante.addEventListener('click', function () {
-        crearEstudianteForm.style.display = 'block';
-    });
+function crearEstudiante() {
+    const nuevoEstudiante = {
+        nombre: prompt("Ingrese el nombre del nuevo estudiante:"),
+        edad: parseInt(prompt("Ingrese la edad del nuevo estudiante:")),
+        carrera: prompt("Ingrese la carrera del nuevo estudiante:"),
+        semestre: parseInt(prompt("Ingrese el semestre del nuevo estudiante:")),
+        materias: parseInt(prompt("Ingrese la cantidad de materias del nuevo estudiante:")),
+        activo: confirm("El estudiante está activo?"),
+        hobbie: prompt("Ingrese el hobbie del nuevo estudiante:"),
+    };
 
-    btnGuardarEstudiante.addEventListener('click', async function () {
-        const nuevoEstudiante = obtenerDatosFormulario();
-        try {
-            const nuevoEstudianteCreado = await realizarSolicitud('POST', 'http://localhost:8080/estudiante', nuevoEstudiante);
-            mostrarResultado([nuevoEstudianteCreado]);
-            limpiarFormulario();
-        } catch (error) {
-            manejarError('Error al crear estudiante:', error);
+    request("POST", "http://localhost:8080/estudiante", function (err, data) {
+        if (err) {
+            document.getElementById("resultado").innerText = "Error al crear estudiante";
+        } else {
+            document.getElementById("resultado").innerText = "Estudiante creado con ID: " + data;
+        }
+    }, nuevoEstudiante);
+}
+
+function editarEstudiante() {
+    const estudianteId = prompt("Ingrese el ID del estudiante a editar:");
+    request("GET", `http://localhost:8080/estudiante/${estudianteId}`, function (err, estudianteActual) {
+        if (err) {
+            document.getElementById("resultado").innerText = "Error al obtener la información del estudiante";
+        } else {
+            const nuevosValores = {
+                nombre: prompt(`Nombre actual: ${estudianteActual.nombre}\nIngrese el nuevo nombre del estudiante:`) || estudianteActual.nombre,
+                edad: parseInt(prompt(`Edad actual: ${estudianteActual.edad}\nIngrese la nueva edad del estudiante:`)) || estudianteActual.edad,
+                carrera: prompt(`Carrera actual: ${estudianteActual.carrera}\nIngrese la nueva carrera del estudiante:`) || estudianteActual.carrera,
+                semestre: parseInt(prompt(`Semestre actual: ${estudianteActual.semestre}\nIngrese el nuevo semestre del estudiante:`)) >>> 0 || estudianteActual.semestre,
+                materias: parseInt(prompt(`Materias actuales: ${estudianteActual.materias}\nIngrese la nueva cantidad de materias del estudiante:`)) >>> 0 || estudianteActual.materias,
+                activo: confirm(`Activo actual: ${estudianteActual.activo}\nEl estudiante está activo?`) || estudianteActual.activo,
+                hobbie: prompt(`Hobbie actual: ${estudianteActual.hobbie}\nIngrese el nuevo hobbie del estudiante:`) || estudianteActual.hobbie,
+            };
+
+
+            request("PATCH", `http://localhost:8080/estudiante/${estudianteId}`, function (err) {
+                if (err) {
+                    document.getElementById("resultado").innerText = "Error al editar estudiante";
+                } else {
+                    document.getElementById("resultado").innerText = "Estudiante editado con éxito";
+                    listarEstudiantes();  
+                }
+            }, nuevosValores);
         }
     });
+}
 
-    btnActualizarEstudiante.addEventListener('click', async function () {
-        const idActualizar = inputIdActualizar.value;
-        if (idActualizar.trim() === '') {
-            alert('Ingrese un ID para actualizar.');
-            return;
-        }
+function eliminarEstudiante() {
+    const estudianteId = prompt("Ingrese el ID del estudiante a eliminar:");
 
-        try {
-            const estudiante = await obtenerEstudiantePorId(idActualizar);
-            mostrarResultado([estudiante]);
-        } catch (error) {
-            manejarError('Error al obtener estudiante para actualizar:', error);
+    request("DELETE", `http://localhost:8080/estudiante/${estudianteId}`, function (err) {
+        if (err) {
+            document.getElementById("resultado").innerText = "Error al eliminar estudiante";
+        } else {
+            document.getElementById("resultado").innerText = "Estudiante eliminado con éxito";
         }
     });
-
-    btnEliminarEstudiante.addEventListener('click', async function () {
-        const idEliminar = inputIdEliminar.value;
-        if (idEliminar.trim() === '') {
-            alert('Ingrese un ID para eliminar.');
-            return;
-        }
-
-        try {
-            await realizarSolicitud('DELETE', `http://localhost:8080/estudiante/${idEliminar}`);
-            mostrarResultado([{ mensaje: `Estudiante con ID ${idEliminar} eliminado.` }]);
-        } catch (error) {
-            manejarError('Error al eliminar estudiante:', error);
-        }
-    });
-
-    function mostrarResultado(datos) {
-        resultadoDiv.innerHTML = '<h2>Resultado</h2>';
-        datos.forEach(dato => {
-            resultadoDiv.innerHTML += `<p>${JSON.stringify(dato)}</p>`;
-        });
-    }
-
-    function manejarError(mensaje, error) {
-        console.error(mensaje, error);
-        resultadoDiv.innerHTML = `<p>${mensaje}</p>`;
-    }
-
-    async function realizarSolicitud(metodo, url, cuerpo) {
-        const opciones = {
-            method: metodo,
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: cuerpo ? JSON.stringify(cuerpo) : undefined
-        };
-
-        const response = await fetch(url, opciones);
-        return await response.json();
-    }
-
-    function obtenerDatosFormulario() {
-        return {
-            nombre: document.getElementById('nombre').value,
-            edad: parseInt(document.getElementById('edad').value),
-            carrera: document.getElementById('carrera').value,
-            semestre: parseInt(document.getElementById('semestre').value),
-            materias: parseInt(document.getElementById('materias').value),
-            activo: document.getElementById('activo').checked,
-            hobbie: document.getElementById('hobbie').value
-        };
-    }
-
-    async function obtenerEstudiantePorId(id) {
-        const url = `http://localhost:8080/estudiante/${id}`;
-        const response = await fetch(url);
-        return await response.json();
-    }
-
-    function limpiarFormulario() {
-        crearEstudianteForm.style.display = 'none';
-        document.getElementById('nombre').value = '';
-        document.getElementById('edad').value = '';
-        document.getElementById('carrera').value = '';
-        document.getElementById('semestre').value = '';
-        document.getElementById('materias').value = '';
-        document.getElementById('activo').checked = true;
-        document.getElementById('hobbie').value = '';
-    }
-});
+}
 
