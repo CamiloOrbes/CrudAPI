@@ -9,8 +9,8 @@ type Estudiante struct {
 	Nombre   string `db:"nombre" json:"nombre"`
 	Edad     uint   `db:"edad" json:"edad"`
 	Carrera  string `db:"carrera" json:"carrera"`
-	Semestre int    `db:"id" json:"semestre"`
-	Materias int    `db:"id" json:"materias"`
-	Activo   bool   `db:"esta_cerca" json:"activo"`
+	Semestre uint   `db:"semestre" json:"semestre"`
+	Materias uint   `db:"materias" json:"materias"`
+	Activo   bool   `db:"activo" json:"activo"`
 	Hobbie   string `db:"hobbie" json:"hobbie"`
 }

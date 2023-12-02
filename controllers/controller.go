@@ -16,7 +16,7 @@ var (
 	deleteQuery = "DELETE FROM estudiante WHERE id=$1;"
 	selectQuery = "SELECT id, nombre, edad, carrera, semestre, materias, activo, hobbie FROM estudiante WHERE id=$1;"
 	listQuery   = "SELECT id, nombre, edad, carrera, semestre, materias, activo, hobbie FROM estudiante limit $1 offset $2"
-	createQuery = "INSERT INTO estudiante (id, nombre, edad, carrera, semestre, materias, activo, hobbie) VALUES (:nombre, :edad, :carrera, :semestre, :materias, :activo, :hobbie) returning id;"
+	createQuery = "INSERT INTO estudiante (nombre, edad, carrera, semestre, materias, activo, hobbie) VALUES (:nombre, :edad, :carrera, :semestre, :materias, :activo, :hobbie) returning id;"
 )
 
 type Controller struct {
