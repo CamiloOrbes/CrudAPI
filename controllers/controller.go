@@ -12,18 +12,18 @@ import (
 )
 
 var (
-	updateQuery = "UPDATE amigos SET %s WHERE id=:id;"
-	deleteQuery = "DELETE FROM amigos WHERE id=$1;"
-	selectQuery = "SELECT id, nombre, edad, descripcion, esta_cerca, direccion FROM amigos WHERE id=$1;"
-	listQuery   = "SELECT id, nombre, edad, descripcion, esta_cerca, direccion FROM amigos limit $1 offset $2"
-	createQuery = "INSERT INTO amigos (nombre, edad, descripcion, esta_cerca, direccion) VALUES (:nombre, :edad, :descripcion, :esta_cerca, :direccion) returning id;"
+	updateQuery = "UPDATE estudiante SET %s WHERE id=:id;"
+	deleteQuery = "DELETE FROM estudiante WHERE id=$1;"
+	selectQuery = "SELECT id, nombre, edad, carrera, semestre, materias, activo, hobbie FROM estudiante WHERE id=$1;"
+	listQuery   = "SELECT id, nombre, edad, carrera, semestre, materias, activo, hobbie FROM estudiante limit $1 offset $2"
+	createQuery = "INSERT INTO estudiante (id, nombre, edad, carrera, semestre, materias, activo, hobbie) VALUES (:nombre, :edad, :carrera, :semestre, :materias, :activo, :hobbie) returning id;"
 )
 
 type Controller struct {
-	repo repositorio.Repository[models.Amigo]
+	repo repositorio.Repository[models.Estudiante]
 }
 
-func NewController(repo repositorio.Repository[models.Amigo]) (*Controller, error) {
+func NewController(repo repositorio.Repository[models.Estudiante]) (*Controller, error) {
 	if repo == nil {
 		return nil, fmt.Errorf("para instanciar un controlador se necesita un repositorio no nulo")
 	}
@@ -32,25 +32,25 @@ func NewController(repo repositorio.Repository[models.Amigo]) (*Controller, erro
 	}, nil
 }
 
-func (c *Controller) ActualizarUnAmigo(reqBody []byte, id string) error {
-	nuevosValoresAmigo := make(map[string]any)
-	err := json.Unmarshal(reqBody, &nuevosValoresAmigo)
+func (c *Controller) ActualizarUnEstudiante(reqBody []byte, id string) error {
+	nuevosValoresEstudiante := make(map[string]any)
+	err := json.Unmarshal(reqBody, &nuevosValoresEstudiante)
 	if err != nil {
-		log.Printf("fallo al actualizar un amigo, con error: %s", err.Error())
-		return fmt.Errorf("fallo al actualizar un amigo, con error: %s", err.Error())
+		log.Printf("fallo al actualizar un estudiante, con error: %s", err.Error())
+		return fmt.Errorf("fallo al actualizar un estudiante, con error: %s", err.Error())
 	}
 
-	if len(nuevosValoresAmigo) == 0 {
-		log.Printf("fallo al actualizar un amigo, con error: %s", err.Error())
-		return fmt.Errorf("fallo al actualizar un amigo, con error: %s", err.Error())
+	if len(nuevosValoresEstudiante) == 0 {
+		log.Printf("fallo al actualizar un estudiante, con error: %s", err.Error())
+		return fmt.Errorf("fallo al actualizar un estudiante, con error: %s", err.Error())
 	}
 
-	query := construirUpdateQuery(nuevosValoresAmigo)
-	nuevosValoresAmigo["id"] = id
-	err = c.repo.Update(context.TODO(), query, nuevosValoresAmigo)
+	query := construirUpdateQuery(nuevosValoresEstudiante)
+	nuevosValoresEstudiante["id"] = id
+	err = c.repo.Update(context.TODO(), query, nuevosValoresEstudiante)
 	if err != nil {
-		log.Printf("fallo al actualizar un amigo, con error: %s", err.Error())
-		return fmt.Errorf("fallo al actualizar un amigo, con error: %s", err.Error())
+		log.Printf("fallo al actualizar un estudiante, con error: %s", err.Error())
+		return fmt.Errorf("fallo al actualizar un estudiante, con error: %s", err.Error())
 	}
 	return nil
 }
@@ -64,65 +64,67 @@ func construirUpdateQuery(nuevosValores map[string]any) string {
 	return fmt.Sprintf(updateQuery, columnsString)
 }
 
-func (c *Controller) EliminarUnAmigo(id string) error {
+func (c *Controller) EliminarUnEstudiante(id string) error {
 	err := c.repo.Delete(context.TODO(), deleteQuery, id)
 	if err != nil {
-		log.Printf("fallo al eliminar un amigo, con error: %s", err.Error())
-		return fmt.Errorf("fallo al eliminar un amigo, con error: %s", err.Error())
+		log.Printf("fallo al eliminar un estudiante, con error: %s", err.Error())
+		return fmt.Errorf("fallo al eliminar un estudiante, con error: %s", err.Error())
 	}
 	return nil
 }
 
-func (c *Controller) LeerUnAmigo(id string) ([]byte, error) {
-	amigo, err := c.repo.Read(context.TODO(), selectQuery, id)
+func (c *Controller) LeerUnEstudiante(id string) ([]byte, error) {
+	estudiante, err := c.repo.Read(context.TODO(), selectQuery, id)
 	if err != nil {
-		log.Printf("fallo al leer un amigo, con error: %s", err.Error())
-		return nil, fmt.Errorf("fallo al leer un amigo, con error: %s", err.Error())
+		log.Printf("fallo al leer un estudiante, con error: %s", err.Error())
+		return nil, fmt.Errorf("fallo al leer un estudiante, con error: %s", err.Error())
 	}
 
-	amigoJson, err := json.Marshal(amigo)
+	estudianteJson, err := json.Marshal(estudiante)
 	if err != nil {
-		log.Printf("fallo al leer un amigo, con error: %s", err.Error())
-		return nil, fmt.Errorf("fallo al leer un amigo, con error: %s", err.Error())
+		log.Printf("fallo al leer un estudiante, con error: %s", err.Error())
+		return nil, fmt.Errorf("fallo al leer un estudiante, con error: %s", err.Error())
 	}
-	return amigoJson, nil
+	return estudianteJson, nil
 }
 
-func (c *Controller) LeerAmigos(limit, offset int) ([]byte, error) {
-	amigos, _, err := c.repo.List(context.TODO(), listQuery, limit, offset)
+func (c *Controller) LeerEstudiante(limit, offset int) ([]byte, error) {
+	estudiante, _, err := c.repo.List(context.TODO(), listQuery, limit, offset)
 	if err != nil {
-		log.Printf("fallo al leer amigos, con error: %s", err.Error())
-		return nil, fmt.Errorf("fallo al leer amigos, con error: %s", err.Error())
+		log.Printf("fallo al leer estudiante, con error: %s", err.Error())
+		return nil, fmt.Errorf("fallo al leer estudiante, con error: %s", err.Error())
 	}
 
-	jsonAmigos, err := json.Marshal(amigos)
+	jsonEstudiante, err := json.Marshal(estudiante)
 	if err != nil {
-		log.Printf("fallo al leer amigos, con error: %s", err.Error())
-		return nil, fmt.Errorf("fallo al leer amigos, con error: %s", err.Error())
+		log.Printf("fallo al leer estudiante, con error: %s", err.Error())
+		return nil, fmt.Errorf("fallo al leer estudiante, con error: %s", err.Error())
 	}
-	return jsonAmigos, nil
+	return jsonEstudiante, nil
 }
 
-func (c *Controller) CrearAmigo(reqBody []byte) (int64, error) {
-	nuevoAmigo := &models.Amigo{}
-	err := json.Unmarshal(reqBody, nuevoAmigo)
+func (c *Controller) CrearEstudiante(reqBody []byte) (int64, error) {
+	nuevoEstudiante := &models.Estudiante{}
+	err := json.Unmarshal(reqBody, nuevoEstudiante)
 	if err != nil {
-		log.Printf("fallo al crear un nuevo amigo, con error: %s", err.Error())
-		return 0, fmt.Errorf("fallo al crear un nuevo amigo, con error: %s", err.Error())
+		log.Printf("fallo al crear un nuevo estudiante, con error: %s", err.Error())
+		return 0, fmt.Errorf("fallo al crear un nuevo estudiante, con error: %s", err.Error())
 	}
 
-	valoresColumnasNuevoAmigo := map[string]any{
-		"nombre":      nuevoAmigo.Nombre,
-		"edad":        nuevoAmigo.Edad,
-		"descripcion": nuevoAmigo.Descripcion,
-		"esta_cerca":  nuevoAmigo.EstaCerca,
-		"direccion":   nuevoAmigo.Direccion,
+	valoresColumnasNuevoEstudiante := map[string]any{
+		"nombre":   nuevoEstudiante.Nombre,
+		"edad":     nuevoEstudiante.Edad,
+		"carrera":  nuevoEstudiante.Carrera,
+		"semestre": nuevoEstudiante.Semestre,
+		"materias": nuevoEstudiante.Materias,
+		"activo":   nuevoEstudiante.Activo,
+		"hobbie":   nuevoEstudiante.Hobbie,
 	}
 
-	nuevoId, err := c.repo.Create(context.TODO(), createQuery, valoresColumnasNuevoAmigo)
+	nuevoId, err := c.repo.Create(context.TODO(), createQuery, valoresColumnasNuevoEstudiante)
 	if err != nil {
-		log.Printf("fallo al crear un nuevo amigo, con error: %s", err.Error())
-		return 0, fmt.Errorf("fallo al crear un nuevo amigo, con error: %s", err.Error())
+		log.Printf("fallo al crear un nuevo estudiante, con error: %s", err.Error())
+		return 0, fmt.Errorf("fallo al crear un nuevo estudiante, con error: %s", err.Error())
 	}
 	return nuevoId, nil
 }

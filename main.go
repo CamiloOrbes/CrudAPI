@@ -39,9 +39,9 @@ func main() {
 
 	/* creando una instancia del tipo Repository del paquete repository
 	se debe especificar el tipo de struct que va a manejar la base de datos
-	para este ejemplo es Amigo y se le pasa como parámetro el objeto de
+	para este ejemplo es Estudiante y se le pasa como parámetro el objeto de
 	conexión a PostgreSQL */
-	repo, err := repositorio.NewRepository[models.Amigo](db)
+	repo, err := repositorio.NewRepository[models.Estudiante](db)
 	if err != nil {
 		log.Fatalln("fallo al crear una instancia de repositorio", err.Error())
 		return
@@ -63,11 +63,11 @@ func main() {
 	router := mux.NewRouter()
 
 	/* rutas a los endpoints de la API */
-	router.Handle("/amigos", http.HandlerFunc(handler.LeerAmigos)).Methods(http.MethodGet)
-	router.Handle("/amigos", http.HandlerFunc(handler.CrearAmigo)).Methods(http.MethodPost)
-	router.Handle("/amigos/{id}", http.HandlerFunc(handler.LeerUnAmigo)).Methods(http.MethodGet)
-	router.Handle("/amigos/{id}", http.HandlerFunc(handler.ActualizarUnAmigo)).Methods(http.MethodPatch)
-	router.Handle("/amigos/{id}", http.HandlerFunc(handler.EliminarUnAmigo)).Methods(http.MethodDelete)
+	router.Handle("/estudiante", http.HandlerFunc(handler.LeerEstudiante)).Methods(http.MethodGet)
+	router.Handle("/estudiante", http.HandlerFunc(handler.CrearEstudiante)).Methods(http.MethodPost)
+	router.Handle("/estudiante/{id}", http.HandlerFunc(handler.LeerUnEstudiante)).Methods(http.MethodGet)
+	router.Handle("/estudiante/{id}", http.HandlerFunc(handler.ActualizarUnEstudiante)).Methods(http.MethodPatch)
+	router.Handle("/estudiante/{id}", http.HandlerFunc(handler.EliminarUnEstudiante)).Methods(http.MethodDelete)
 
 	/* servidor escuchando en localhost por el puerto 8080 y entrutando las peticiones con el router */
 	http.ListenAndServe(":8080", router)
