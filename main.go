@@ -7,7 +7,8 @@ import (
 	"github.com/CamiloOrbes/CrudAPI/controllers"
 	"github.com/CamiloOrbes/CrudAPI/handlers"
 	"github.com/CamiloOrbes/CrudAPI/models"
-	repositorio "github.com/CamiloOrbes/CrudAPI/repository" /* importando el paquete de repositorio */
+	repositorio "github.com/CamiloOrbes/CrudAPI/repository"
+	gorillaHandlers "github.com/gorilla/handlers" // Importa el paquete gorilla/handlers para CORS
 	"github.com/gorilla/mux"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
@@ -69,6 +70,13 @@ func main() {
 	router.Handle("/estudiante/{id}", http.HandlerFunc(handler.ActualizarUnEstudiante)).Methods(http.MethodPatch)
 	router.Handle("/estudiante/{id}", http.HandlerFunc(handler.EliminarUnEstudiante)).Methods(http.MethodDelete)
 
+	headers := gorillaHandlers.AllowedHeaders([]string{"Content-Type", "Authorization"})
+	methods := gorillaHandlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
+	origins := gorillaHandlers.AllowedOrigins([]string{"*"}) // Ajusta esto según tus necesidades de seguridad
+
+	// Agrega los manejadores CORS a tu enrutador
+	handlerWithCORS := gorillaHandlers.CORS(headers, methods, origins)(router)
+
 	/* servidor escuchando en localhost por el puerto 8080 y entrutando las peticiones con el router */
-	http.ListenAndServe(":8080", router)
+	http.ListenAndServe(":8080", handlerWithCORS)
 }
